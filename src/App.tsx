@@ -1,9 +1,10 @@
 import { useEffect, useState, type SetStateAction } from 'react'
-import { auth } from './firebase/firebase'
+import { auth, realTimedb } from './firebase/firebase'
 import LoginPage from './features/Login'
 import { findMatch, cancelQueue } from './utils/matchmake'
 import ChatRoom from './features/Chatroom'
 import type { User } from 'firebase/auth'
+import { ref, set, onDisconnect } from 'firebase/database'
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null)
@@ -30,6 +31,19 @@ export default function App() {
       setWaiting(true)
     }
   }
+
+  useEffect(() => {
+    if (!user) return
+    const userId = user.uid
+    const presenceRef = ref(realTimedb, `presence/${userId}`)
+
+    // Mark as online
+    set(presenceRef, { online: true, timestamp: Date.now() })
+
+    // When user disconnects, remove presence
+    onDisconnect(presenceRef).remove()
+  }, [user])
+
   const stopWaiting = async () => {
     await cancelQueue()
     setWaiting(false)
