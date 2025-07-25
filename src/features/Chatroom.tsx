@@ -14,9 +14,11 @@ export default function ChatRoom({
   roomId,
   onSkip,
   onLeave,
+  onNext,
 }: {
   roomId: string
   onSkip: () => void
+  onNext: () => void
   onLeave: (roomId: SetStateAction<null | string>) => void
 }) {
   const currentUserId = auth.currentUser?.uid
@@ -57,11 +59,6 @@ export default function ChatRoom({
       if (!snapshot.exists()) {
         onSkip()
         console.log('Room deleted, leaving...')
-        // findMatch((newRoomId: string) => {
-        //   console.log('New room found:', newRoomId)
-
-        //   onLeave(newRoomId)
-        // })
       }
     })
 
@@ -108,16 +105,40 @@ export default function ChatRoom({
     onLeave(null)
   }
 
+  // 🔄 Next (skip) handler
+  const handleNext = async () => {
+    if (!roomId) return
+
+    selfLeavingRef.current = true
+    await deleteDoc(doc(db, 'rooms', roomId))
+
+    // Optional: delete all messages
+    const messagesRef = collection(db, 'rooms', roomId, 'messages')
+    const messagesSnapshot = await getDocs(messagesRef)
+    const deletePromises = messagesSnapshot.docs.map((doc) =>
+      deleteDoc(doc.ref)
+    )
+    await Promise.all(deletePromises)
+
+    onNext()
+  }
+
   return (
-    <div className='chat-room max-w-md mx-auto flex flex-col h-[90vh] bg-white shadow-lg rounded-xl overflow-hidden border'>
+    <div className='chat-room w-[90vw] mx-auto flex flex-col h-[95dvh] bg-white shadow-lg rounded-xl overflow-hidden border'>
       {/* Header */}
       <div className='chat-header flex justify-between items-center p-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white'>
-        <h2 className='text-xl font-semibold'>Chat Room</h2>
         <button
           onClick={handleLeave}
           className='bg-white text-purple-600 px-3 py-1 rounded-md text-sm hover:bg-gray-100 transition'
         >
           Leave
+        </button>
+        <h2 className='text-xl font-semibold'>Chat Room</h2>
+        <button
+          onClick={handleNext}
+          className='bg-white text-pink-600 px-3 py-1 rounded-md text-sm hover:bg-gray-100 transition'
+        >
+          Next
         </button>
       </div>
 

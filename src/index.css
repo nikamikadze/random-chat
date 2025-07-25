@@ -2,13 +2,19 @@
 
 body {
   font-family: 'Segoe UI', sans-serif;
-  background-color: #f6f8fa;
   margin: 0;
   padding: 0;
   display: flex;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 100dvh;
   align-items: center;
+}
+
+#root {
+  width: 100vw;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 100dvh;
 }
 
 button {
@@ -37,10 +43,8 @@ input {
 }
 
 .container {
-  background-color: white;
-  padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-  width: 100%;
+  margin: 15px auto;
+  width: 100vw;
   max-width: 400px;
 }

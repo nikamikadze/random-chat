@@ -47,20 +47,46 @@ export default function App() {
 
   return (
     <div className='container'>
-      <h1>Welcome {user.isAnonymous ? 'Guest' : user.email}</h1>
+      {!roomId && (
+        <div className='flex flex-col items-center justify-center h-[100dvh] text-center'>
+          {!roomId && !waiting && (
+            <>
+              <h1 className='text-2xl mb-4'>
+                Welcome {user.isAnonymous ? 'Guest' : user.email}
+              </h1>
+              <button
+                onClick={startChat}
+                className='bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition'
+              >
+                Start Chat
+              </button>
+            </>
+          )}
 
-      {!roomId && !waiting && <button onClick={startChat}>Start Chat</button>}
-
-      {waiting && (
-        <>
-          <p>Waiting for a match...</p>
-          <button onClick={stopWaiting}>Cancel</button>
-        </>
+          {waiting && (
+            <>
+              <p className='text-lg mb-4'>Waiting for a match...</p>
+              <button
+                onClick={stopWaiting}
+                className='bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition'
+              >
+                Cancel
+              </button>
+            </>
+          )}
+        </div>
       )}
 
       {roomId && (
         <ChatRoom
           roomId={roomId}
+          onNext={() => {
+            setRoomId(null)
+            setWaiting(true)
+            setTimeout(() => {
+              startChat()
+            }, 1000)
+          }}
           onSkip={() => {
             setRoomId(null)
             setWaiting(true)
