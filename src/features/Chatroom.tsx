@@ -8,6 +8,8 @@ import {
   doc,
   getDocs,
   type DocumentData,
+  query,
+  orderBy,
 } from 'firebase/firestore'
 
 export default function ChatRoom({
@@ -31,16 +33,24 @@ export default function ChatRoom({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  // ⏳ Listen for new messages
   useEffect(() => {
     const messagesRef = collection(db, 'rooms', roomId, 'messages')
-    const unsubscribe = onSnapshot(messagesRef, (snap) => {
-      const msgs = snap.docs.map((d) => d.data())
+
+    const q = query(messagesRef, orderBy('createdAt', 'asc')) 
+
+    const unsubscribe = onSnapshot(q, (snap) => {
+      const msgs = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }))
+      console.log('messages', msgs)
+
       setMessages(msgs)
       setTimeout(() => {
         scrollToBottom()
-      }, 100) // Delay to ensure DOM updates
+      }, 100)
     })
+
     return () => unsubscribe()
   }, [roomId])
 
